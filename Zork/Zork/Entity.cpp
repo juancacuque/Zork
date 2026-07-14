@@ -1,0 +1,57 @@
+#include "Entity.h"
+#include <iostream>
+Entity::Entity(EntityType type, const std::string& name, const std::string& description) : type(type), name(name), description(description)
+{
+}
+
+Entity::~Entity()
+{
+}
+
+void Entity::Update()
+{
+}
+
+const std::string& Entity::GetName() const
+{
+    return name;
+}
+
+EntityType Entity::GetType() const
+{
+    return type;
+}
+
+void Entity::Look() const
+{
+    std::cout << GetName() << std::endl;
+	std::cout << description << std::endl;
+}
+
+
+const std::list<Entity*>& Entity::GetContains() const
+{
+    return contains;
+}
+
+void Entity::Add(Entity* entity)
+{
+    contains.push_back(entity);
+}
+
+bool Entity::Remove(Entity* entity)
+{
+    auto before = contains.size();
+    contains.remove(entity);
+
+    if (contains.size() < before)
+    {
+        return true;
+    }
+
+    else 
+    {
+        return false;
+    }
+    
+}
