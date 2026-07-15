@@ -7,6 +7,8 @@ public :
     World();
 	~World();
 
+	void CreateWorld();
+
 	void AddEntity(Entity* entity);
 	bool RemoveEntity(Entity* entity);
 	const std::vector<Entity*>& GetEntities() const;

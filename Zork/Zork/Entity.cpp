@@ -17,6 +17,11 @@ const std::string& Entity::GetName() const
     return name;
 }
 
+const std::string& Entity::GetDescription() const
+{
+	return description;
+}
+
 EntityType Entity::GetType() const
 {
     return type;
@@ -25,7 +30,7 @@ EntityType Entity::GetType() const
 void Entity::Look() const
 {
     std::cout << GetName() << std::endl;
-	std::cout << description << std::endl;
+	std::cout << GetDescription() << std::endl;
 }
 
 

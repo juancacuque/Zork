@@ -21,6 +21,7 @@ public:
     virtual void Update();
 
     const std::string& GetName() const;
+    const std::string& GetDescription() const;
     EntityType GetType() const;
     virtual void Look() const;
 

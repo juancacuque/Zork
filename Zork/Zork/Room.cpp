@@ -27,6 +27,7 @@ void Room::Look() const
             }
 
             std::cout << entity->GetName() << std::endl;
+            
         }
     }
 
@@ -37,6 +38,7 @@ void Room::Look() const
         if (entity->GetType() == EntityType::Exit)
         {
             std::cout << entity->GetName() << std::endl;
+            std::cout << entity->GetDescription() << std::endl;
         }
     }
 }

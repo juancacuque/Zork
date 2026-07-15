@@ -1,11 +1,18 @@
 #include <iostream>
-#include <vector>
-#include <string>
-#include <list>
 #include "World.h"
+
 int main()
 {
-	std::cout << "Welcome to Zork!" << std::endl;
 	World world;
-	return 0;
+	world.CreateWorld();
+	
+    // temporal
+    for (Entity* entity : world.GetEntities())
+    {
+        if (entity->GetType() == EntityType::Room)
+        {
+            entity->Look();
+        }
+    }
+
 }
