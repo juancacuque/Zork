@@ -1,6 +1,7 @@
 #include "World.h"
 #include "Room.h"
 #include "Exit.h"
+#include "Player.h"
 #include "InputReader.h"
 #include <iostream>
 
@@ -37,6 +38,8 @@ void World::CreateWorld()
 	Exit* exit8 = new Exit("Exit 8", "You see a path in the SOUTH direction.", ExitDirection::South, room3, room2, false);
 	Exit* exit9 = new Exit("Exit 9", "You see a path in the NORTH direction.", ExitDirection::North, room3, room6, true);
 	Exit* exit10 = new Exit("Exit 10", "You see a path in the SOUTH direction.", ExitDirection::South, room6, room3, false);
+	
+	player = new Player ("Player", "This is you.", 100, 10, room1);
 
 	room1->Add(exit1);
 	room2->Add(exit2);
@@ -67,7 +70,7 @@ void World::CreateWorld()
 	AddEntity(exit9);
 	AddEntity(exit10);
 
-
+	AddEntity(player);
 }
 
 void World::AddEntity(Entity* entity)

@@ -2,6 +2,7 @@
 #include <vector>
 #include "Entity.h"
 
+class Player;
 class World {
 public :
     World();
@@ -18,5 +19,6 @@ public :
 	
 private: 
 	std::vector<Entity*> entities;
+	Player* player = nullptr;
 };
 
