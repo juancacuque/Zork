@@ -13,8 +13,10 @@ public :
 	bool RemoveEntity(Entity* entity);
 	const std::vector<Entity*>& GetEntities() const;
 
-	
+	void Play();
 
+	
 private: 
 	std::vector<Entity*> entities;
 };
+

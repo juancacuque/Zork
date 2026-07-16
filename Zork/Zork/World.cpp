@@ -1,7 +1,8 @@
 #include "World.h"
 #include "Room.h"
 #include "Exit.h"
-#include <algorithm>
+#include "InputReader.h"
+#include <iostream>
 
 World::World()
 {
@@ -89,3 +90,37 @@ const std::vector<Entity*>& World::GetEntities() const
 {
 	return entities;
 }
+
+void World::Play()
+{
+	bool canPlay = true;
+
+	while (canPlay)
+	{
+		std::cout << "> ";
+
+		std::string line;
+		std::getline(std::cin, line);
+
+		auto tokens = InputReader::Tokenize(line);
+
+		if (tokens.empty())
+		{
+			continue;
+		}
+
+		if (tokens[0] == "quit")
+		{
+			canPlay = false;
+		}
+		else
+		{
+			std::cout << "Unknown command. Type help for a list of commands.";
+		}
+
+		std::cout << std::endl;
+	}
+}
+
+
+
