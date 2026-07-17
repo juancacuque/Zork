@@ -130,8 +130,6 @@ void World::Play()
 		{
 			std::cout << "Unknown command. Type help for a list of commands.";
 		}
-
-		std::cout << std::endl;
 	}
 }
 
