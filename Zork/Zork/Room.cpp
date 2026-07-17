@@ -1,6 +1,6 @@
 #include <iostream>
 #include "Room.h"
-
+#include "Item.h"
 Room::Room(const std::string& name, const std::string& description) : Entity(EntityType::Room, name, description)
 {
 
@@ -20,6 +20,15 @@ void Room::Look() const
     {
         if (entity->GetType() != EntityType::Exit)
         {
+            if (entity->GetType() == EntityType::Item) 
+            {
+                Item* item = static_cast<Item*>(entity);
+
+                if (item->GetHiddenStatus()) 
+                {
+                    continue;
+                }
+            }
             if (!printedItems)
             {
                 std::cout << "You can see in the room: " << std::endl;

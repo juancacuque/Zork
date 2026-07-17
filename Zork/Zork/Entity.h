@@ -27,6 +27,8 @@ public:
 
 	const std::list<Entity*>& GetContains() const;
 
+    Entity* Find(const std::string& name) const;
+
     void Add(Entity* entity);
     bool Remove(Entity* entity);
 

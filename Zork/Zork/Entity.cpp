@@ -39,6 +39,18 @@ const std::list<Entity*>& Entity::GetContains() const
     return contains;
 }
 
+Entity* Entity::Find(const std::string& name) const
+{
+    for (Entity* entity : GetContains())
+    {
+        if (entity->GetName() == name)
+        {
+            return entity;
+        }
+    }
+    return nullptr;
+}
+
 void Entity::Add(Entity* entity)
 {
     contains.push_back(entity);

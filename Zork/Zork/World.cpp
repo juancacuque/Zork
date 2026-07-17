@@ -3,6 +3,7 @@
 #include "Exit.h"
 #include "Player.h"
 #include "InputReader.h"
+#include "Item.h"
 #include <iostream>
 
 World::World()
@@ -41,6 +42,14 @@ void World::CreateWorld()
 	
 	player = new Player ("Player", "This is you.", 100, 10, room1);
 
+	Item* backpack = new Item("backpack", "Your backpack. You can save items or throw them from here.");
+	Item* potion = new Item("potion", "A healing potion.");
+	Item* sword = new Item("sword", "A large but old sword. Looks like it has gone through rough battles before.");
+	Item* armor = new Item("armor", "A bit small armor for you, but will work to protect you frome reciving some damage.");
+	Item* bag = new Item("bag", "A small bag. You grab it and seems to not be empty.", true);
+	Item* key = new Item("key", "A small key, it might be usefull for your journey.");
+	Item* map = new Item("map", "A map of the cave.");
+
 	room1->Add(exit1);
 	room2->Add(exit2);
 	room2->Add(exit3);
@@ -72,6 +81,26 @@ void World::CreateWorld()
 
 	AddEntity(player);
 
+	AddEntity(backpack);
+	AddEntity(potion);
+	AddEntity(sword);
+	AddEntity(armor);
+	AddEntity(bag);
+	AddEntity(key);
+	AddEntity(map);
+
+	player->Add(backpack);
+
+	room2->Add(potion);
+
+	room3->Add(sword);
+
+	room4->Add(armor);
+	room4->Add(bag);
+
+	bag->Add(key);
+
+	room5->Add(map);
 	
 }
 
