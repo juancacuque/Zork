@@ -20,5 +20,6 @@ public :
 private: 
 	std::vector<Entity*> entities;
 	Player* player = nullptr;
+	void Go(const std::vector<std::string>& tokens);
 };
 

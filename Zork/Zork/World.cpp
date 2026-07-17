@@ -71,6 +71,8 @@ void World::CreateWorld()
 	AddEntity(exit10);
 
 	AddEntity(player);
+
+	
 }
 
 void World::AddEntity(Entity* entity)
@@ -98,6 +100,8 @@ void World::Play()
 {
 	bool canPlay = true;
 
+	player->GetLocation()->Look();
+
 	while (canPlay)
 	{
 		std::cout << "> ";
@@ -107,6 +111,7 @@ void World::Play()
 
 		auto tokens = InputReader::Tokenize(line);
 
+		
 		if (tokens.empty())
 		{
 			continue;
@@ -116,6 +121,11 @@ void World::Play()
 		{
 			canPlay = false;
 		}
+		else if (tokens[0] == "go") 
+		{
+
+			Go(tokens);
+		}
 		else
 		{
 			std::cout << "Unknown command. Type help for a list of commands.";
@@ -124,6 +134,50 @@ void World::Play()
 		std::cout << std::endl;
 	}
 }
+
+void World::Go(const std::vector<std::string>& tokens)
+{
+	if (tokens.size() < 2) {
+		std::cout << "You have to specify a direction (north, south, east, west).";
+	}
+	else {
+		ExitDirection dir;
+		if (tokens[1] == "north") {
+			dir = ExitDirection::North;
+		}
+		else if (tokens[1] == "south") {
+			dir = ExitDirection::South;
+		}
+		else if (tokens[1] == "east") {
+			dir = ExitDirection::East;
+		}
+		else if (tokens[1] == "west") {
+			dir = ExitDirection::West;
+		}
+		else {
+			std::cout << "Not valid direction, try again or type help for a list of commands.";
+			std::cout << std::endl;
+			return;
+		}
+
+		Room* currentRoom = player->GetLocation();
+		Exit* exit = currentRoom->GetExit(dir);
+		if (exit == nullptr) {
+			std::cout << "You can't go through this direction as you face a wall";
+		}
+		else if (exit->GetLockStatus()) {
+			std::cout << "This path is blocked, you might need some object to open it.";
+		}
+		else {
+			Room* nextRoom = exit->GetDestination();
+			player->SetLocation(nextRoom);
+			std::cout << "You go through " << exit->GetName() << " and you get to the " << nextRoom->GetName() << ".";
+			nextRoom->Look();
+		}
+	}
+}
+
+
 
 
 
