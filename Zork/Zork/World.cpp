@@ -125,6 +125,17 @@ const std::vector<Entity*>& World::GetEntities() const
 	return entities;
 }
 
+bool World::MoveEntity(Entity* entityToMove, Entity* from, Entity* to)
+{
+	if (from->Remove(entityToMove))
+	{
+		to->Add(entityToMove);
+		return true;
+	}
+
+	return false;
+}
+
 void World::Play()
 {
 	bool canPlay = true;
@@ -154,6 +165,26 @@ void World::Play()
 		{
 
 			Go(tokens);
+		}
+		else if (tokens[0]== "take") 
+		{
+			Take(tokens);
+		}
+		else if (tokens[0] == "drop")
+		{
+			Drop(tokens);
+		}
+		else if (tokens[0] == "look")
+		{
+			player->GetLocation()->Look();
+		}
+		else if (tokens[0] == "open")
+		{
+			Open(tokens);
+		}
+		else if (tokens[0] == "put")
+		{
+			Put(tokens);
 		}
 		else
 		{
@@ -199,9 +230,222 @@ void World::Go(const std::vector<std::string>& tokens)
 			Room* nextRoom = exit->GetDestination();
 			player->SetLocation(nextRoom);
 			std::cout << "You go through " << exit->GetName() << " and you get to the " << nextRoom->GetName() << ".";
+			std::cout << std::endl;
 			nextRoom->Look();
 		}
 	}
+}
+
+void World::Take(const std::vector<std::string>& tokens)
+{
+	if (tokens.size() < 2)
+	{
+		std::cout << "Take what?";
+		return;
+	}
+
+	Room* room = player->GetLocation();
+	Entity* backpack = player->Find("backpack");
+	Entity* entity = room->Find(tokens[1]);
+	
+	if (entity == nullptr)
+	{
+		std::cout << "There is no " << tokens[1] << " here.";
+		return;
+	}
+	if (backpack == nullptr)
+	{
+		return;
+	}
+
+	if (entity->GetType() != EntityType::Item) 
+	{
+		std::cout << "You can't take that.";
+		return;
+	}
+
+	if (entity->GetType() == EntityType::Item)
+	{
+		Item* item = static_cast<Item*>(entity);
+
+		if (!item->GetHiddenStatus())
+		{
+			if (MoveEntity(item, room, backpack)) {
+				std::cout << "You took the " << item->GetName() << " and put it in your backpack.";
+			}
+		}
+
+		else
+		{
+			std::cout << "You can't see any " << tokens[1] << " here.";
+		}
+	}
+}
+
+void World::Drop(const std::vector<std::string>& tokens)
+{
+	if (tokens.size() < 2)
+	{
+		std::cout << "Drop what?";
+		return;
+	}
+	Room* room = player->GetLocation();
+	Entity* backpack = player->Find("backpack");
+	if (backpack == nullptr)
+	{
+		return;
+	}
+	Entity* entity = backpack->Find(tokens[1]);
+	
+
+	if (entity == nullptr)
+	{
+		std::cout << "You don't have a " << tokens[1] << " in your backpack.";
+		return;
+	}
+	
+
+	if (MoveEntity(entity, backpack, room)) {
+		std::cout << "You dropped the " << entity->GetName() << " in the " << room->GetName() << ".";
+	}
+}
+
+void World::Open(const std::vector<std::string>& tokens)
+{
+	if (tokens.size() < 2)
+	{
+		std::cout << "Open what?";
+		return;
+	}
+
+	Room* room = player->GetLocation();
+	Entity* backpack = player->Find("backpack");
+	if (backpack == nullptr)
+	{
+		return;
+	}
+
+	Entity* entity = room->Find(tokens[1]);
+
+	if (entity == nullptr)
+	{
+		entity = backpack->Find(tokens[1]);
+	}
+
+	if (entity == nullptr)
+	{
+		entity = player->Find(tokens[1]);
+	}
+
+	if (entity == nullptr)
+	{
+		std::cout << "There is no " << tokens[1] << " here.";
+		return;
+	}
+
+	if (entity->GetType() != EntityType::Item)
+	{
+		std::cout << "You can't open that.";
+		return;
+	}
+
+	if (entity->GetType() == EntityType::Item)
+	{
+		Item* item = static_cast<Item*>(entity);
+
+		if (item->GetHiddenStatus())
+		{
+			std::cout << "There is no " << tokens[1] << " here.";
+			return;
+		}
+
+		if (item->GetContains().empty())
+		{
+			std::cout << "The " << item->GetName() << " is empty.";
+			return;
+		}
+
+		std::cout << "The " << item->GetName() << " contains:" << std::endl;
+
+		for (Entity* entity : item->GetContains())
+		{
+			std::cout << entity->GetName() << std::endl;
+		}
+	}
+	
+}
+
+void World::Put(const std::vector<std::string>& tokens)
+{
+	if (tokens.size() < 4 || tokens[2] != "in")
+	{
+		std::cout << "Put what in what? Try: put [item] in [bag]";
+		return;
+	}
+
+	Entity* backpack = player->Find("backpack");
+
+	if (backpack == nullptr)
+	{
+		return;
+	}
+
+	Entity* itemEntity = backpack->Find(tokens[1]);
+
+	if (itemEntity == nullptr)
+	{
+		std::cout << "There is no " << tokens[1] << ".";
+		return;
+	}
+
+	Room* room = player->GetLocation();
+
+	Entity* bag = room->Find(tokens[3]);
+
+	if (bag == nullptr)
+	{
+		bag = backpack->Find(tokens[3]);
+	}
+
+	if (bag == nullptr)
+	{
+		bag = player->Find(tokens[3]);
+	}
+
+	if (bag == nullptr)
+	{
+		std::cout << "There is no " << tokens[3] << " here.";
+		return;
+	}
+
+	if (bag->GetType() != EntityType::Item)
+	{
+		std::cout << "You can't put something in that.";
+		return;
+	}
+
+	if (bag->GetType() == EntityType::Item)
+	{
+		Item* item = static_cast<Item*>(itemEntity);
+		Item* destination = static_cast<Item*>(bag);
+
+		if (destination->GetHiddenStatus())
+		{
+			std::cout << "There is no " << tokens[3] << " here.";
+			return;
+		}
+
+		if (destination == backpack)
+		{
+			std::cout << "The item is already in your backpack.";
+			return;
+		}
+		if (MoveEntity(item, backpack, destination))
+		{
+			std::cout << "You put the " << item->GetName() << " in " << destination->GetName() << ".";
+		}
+	}
+	
 }
 
 

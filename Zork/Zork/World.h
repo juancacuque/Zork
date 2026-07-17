@@ -14,6 +14,8 @@ public :
 	bool RemoveEntity(Entity* entity);
 	const std::vector<Entity*>& GetEntities() const;
 
+	bool MoveEntity(Entity* entityToMove, Entity* from, Entity* to);
+
 	void Play();
 
 	
@@ -21,5 +23,9 @@ private:
 	std::vector<Entity*> entities;
 	Player* player = nullptr;
 	void Go(const std::vector<std::string>& tokens);
+	void Take(const std::vector<std::string>& tokens);
+	void Drop(const std::vector<std::string>& tokens);
+	void Open(const std::vector<std::string>& tokens);
+	void Put(const std::vector<std::string>& tokens);
 };
 
