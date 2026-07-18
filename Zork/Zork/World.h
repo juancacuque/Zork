@@ -3,6 +3,8 @@
 #include "Entity.h"
 
 class Player;
+class Room;
+class NPC;
 class World {
 public :
     World();
@@ -27,5 +29,10 @@ private:
 	void Drop(const std::vector<std::string>& tokens);
 	void Open(const std::vector<std::string>& tokens);
 	void Put(const std::vector<std::string>& tokens);
+	void Attack();
+
+	NPC* GetEnemy(Room* room) const;
+
+	bool canPlay = true;
 };
 

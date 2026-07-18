@@ -147,12 +147,11 @@ bool World::MoveEntity(Entity* entityToMove, Entity* from, Entity* to)
 
 void World::Play()
 {
-	bool canPlay = true;
-
 	player->GetLocation()->Look();
 
 	while (canPlay)
 	{
+		
 		std::cout << "> ";
 
 		std::string line;
@@ -166,6 +165,27 @@ void World::Play()
 			continue;
 		}
 
+		NPC* enemy = GetEnemy(player->GetLocation());
+
+		if (enemy != nullptr)
+		{
+			if (tokens[0] == "attack") {
+				Attack();
+			}
+			else if (tokens[0] == "go") 
+			{
+				Go(tokens);
+			}
+			else if (tokens[0] == "quit")
+			{
+				canPlay = false;
+			}
+			else
+			{
+				std::cout << "Unknown command. Type help for a list of commands.";
+			}
+			continue;
+		}
 		if (tokens[0] == "quit")
 		{
 			canPlay = false;
@@ -194,6 +214,10 @@ void World::Play()
 		else if (tokens[0] == "put")
 		{
 			Put(tokens);
+		}
+		else if (tokens[0] == "attack")
+		{
+			Attack();
 		}
 		else
 		{
@@ -228,6 +252,27 @@ void World::Go(const std::vector<std::string>& tokens)
 		}
 
 		Room* currentRoom = player->GetLocation();
+
+		NPC* enemy = GetEnemy(currentRoom);
+
+		if (enemy != nullptr)
+		{
+			player->TakeDamage(enemy->GetDamage());
+
+			std::cout << "The " << enemy->GetName() << " hits you while you try to escape for " << enemy->GetDamage() << " damage." << std::endl;
+
+			std::cout << "Your health: "<< player->GetHealth() << "hp." << std::endl;
+
+			if (!player->IsAlive())
+			{
+				std::cout << "You died while trying to escape." << std::endl;
+				std::cout << "Game Over." << std::endl;
+				canPlay = false;
+				return;
+			}
+		}
+
+
 		Exit* exit = currentRoom->GetExit(dir);
 		if (exit == nullptr) {
 			std::cout << "You can't go through this direction as you face a wall";
@@ -240,7 +285,16 @@ void World::Go(const std::vector<std::string>& tokens)
 			player->SetLocation(nextRoom);
 			std::cout << "You go through " << exit->GetName() << " and you get to the " << nextRoom->GetName() << ".";
 			std::cout << std::endl;
+
 			nextRoom->Look();
+			
+			NPC* newEnemy = GetEnemy(nextRoom);
+			if (newEnemy != nullptr)
+			{
+				std::cout << "A "<< newEnemy->GetName()<< " blocks your way!" << std::endl;
+				std::cout << newEnemy->GetDescription()	<< std::endl;
+				std::cout << "What do you do?" << std::endl;
+			}
 		}
 	}
 }
@@ -455,6 +509,63 @@ void World::Put(const std::vector<std::string>& tokens)
 		}
 	}
 	
+}
+
+void World::Attack()
+{
+	NPC* enemy = GetEnemy(player->GetLocation());
+
+	if (enemy == nullptr)
+	{
+		std::cout << "There is nothing to attack.";
+		return;
+	}
+
+	enemy->TakeDamage(player->GetDamage());
+
+	std::cout << "You hit the " << enemy->GetName() << " and deal " << player->GetDamage() << " damage." << std::endl;
+	std::cout << "The " << enemy->GetName() << "'s health: " << enemy->GetHealth() << "hp." << std::endl;
+
+	if (!enemy->IsAlive())
+	{
+		std::cout << "You defeated the " << enemy->GetName() << "!"
+			<< std::endl;
+
+		player->GetLocation()->Remove(enemy);
+
+		player->GetLocation()->Look();
+
+		return;
+	}
+
+	player->TakeDamage(enemy->GetDamage());
+
+	std::cout << "The " << enemy->GetName()	<< " hits you for " << enemy->GetDamage() << " damage."
+		<< std::endl;
+	std::cout << "Your health: " << player->GetHealth() <<"hp." << std::endl;
+	if (!player->IsAlive())
+	{
+		std::cout << "You have been defeated by the " << enemy->GetName() << "!" << std::endl;
+		std::cout << "Game Over." << std::endl;
+		canPlay = false;
+
+	}
+}
+
+NPC* World::GetEnemy(Room* room) const
+{
+	for (Entity* entity : room->GetContains())
+	{
+		if (entity->GetType() ==EntityType::Npc)
+		{
+			NPC* npc = static_cast<NPC*>(entity);
+			if (npc->IsAlive())
+			{
+				return npc;
+			}
+		}
+	}
+	return nullptr;
 }
 
 
