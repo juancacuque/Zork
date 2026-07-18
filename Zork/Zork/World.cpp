@@ -5,7 +5,7 @@
 #include "InputReader.h"
 #include "Item.h"
 #include <iostream>
-
+#include "NPC.h"
 World::World()
 {
 }
@@ -50,6 +50,9 @@ void World::CreateWorld()
 	Item* key = new Item("key", "A small key, it might be usefull for your journey.");
 	Item* map = new Item("map", "A map of the cave.");
 
+	NPC* monster = new NPC("monster", "Ugly monster has shown up and looks agresive.", 40, 15, room3);
+	NPC* boss = new NPC("boss", "Seems to have been here covered by the previous monster, probably thay have some relation. After you enter, the boss seems to be really agresive towards you as he has seen the monster defeated.", 90, 25, room6);
+
 	room1->Add(exit1);
 	room2->Add(exit2);
 	room2->Add(exit3);
@@ -89,11 +92,15 @@ void World::CreateWorld()
 	AddEntity(key);
 	AddEntity(map);
 
+	AddEntity(monster);
+	AddEntity(boss);
+
 	player->Add(backpack);
 
 	room2->Add(potion);
 
 	room3->Add(sword);
+	room3->Add(monster);
 
 	room4->Add(armor);
 	room4->Add(bag);
@@ -101,6 +108,8 @@ void World::CreateWorld()
 	bag->Add(key);
 
 	room5->Add(map);
+
+	room6->Add(boss);
 	
 }
 

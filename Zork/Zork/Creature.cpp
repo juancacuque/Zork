@@ -27,3 +27,17 @@ void Creature::SetLocation(Room* newLocation)
 {
 	location = newLocation;
 }
+
+void Creature::TakeDamage(int amount)
+{
+	health -= amount;
+	if (!IsAlive()) {
+		health = 0;
+	}
+
+}
+
+bool Creature::IsAlive() const
+{
+	return health > 0;
+}

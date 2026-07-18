@@ -10,8 +10,13 @@ public:
 	int GetDamage() const;
 	Room* GetLocation() const;
 	void SetLocation(Room* newLocation);
+
+	void TakeDamage(int amount);
+	bool IsAlive() const;
 private:
 	int health;
 	int damage;
 	Room* location;
+
+	
 };
