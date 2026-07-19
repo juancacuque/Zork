@@ -32,6 +32,7 @@ public:
     void Add(Entity* entity);
     bool Remove(Entity* entity);
 
+    Entity* GetParent() const;
 protected:
 
     EntityType type;
@@ -42,5 +43,5 @@ private:
 
     std::list<Entity*> contains;
 
+    Entity* parent = nullptr;
 };
-

@@ -33,8 +33,9 @@ private:
 	void Attack();
 	void Use(const std::vector<std::string>& tokens);
 	void Search();
-
+	void Read(const std::vector<std::string>& tokens);
 	NPC* GetEnemy(Room* room) const;
+	void Help();
 
 	bool canPlay = true;
 };

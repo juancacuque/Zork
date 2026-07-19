@@ -190,6 +190,10 @@ void World::Play()
 			{
 				Use(tokens);
 			}
+			else if (tokens[0] == "help")
+			{
+				Help();
+			}
 			else
 			{
 				std::cout << "Unknown command. Type help for a list of commands.";
@@ -240,6 +244,14 @@ void World::Play()
 		else if (tokens[0] == "search")
 		{
 			Search();
+		}
+		else if (tokens[0] == "read")
+		{
+			Read(tokens);
+		}
+		else if (tokens[0] == "help")
+		{
+			Help();
 		}
 		else
 		{
@@ -358,7 +370,7 @@ void World::Take(const std::vector<std::string>& tokens)
 		if (!item->GetHiddenStatus())
 		{
 			
-			if (MoveEntity(item, room, backpack)) 
+			if (MoveEntity(item, item->GetParent(), backpack))
 			{
 				std::cout << "You took the " << item->GetName() << " and put it in your backpack.";
 			}
@@ -467,7 +479,7 @@ void World::Open(const std::vector<std::string>& tokens)
 		{
 			item->Open();
 
-			std::cout << "You open the chest. Inside you find:" << std::endl;
+			std::cout << "You open the "<<item->GetName()<<". Inside you find:" << std::endl;
 
 			for (Entity* entity : item->GetContains())
 			{
@@ -624,6 +636,18 @@ void World::Attack()
 
 		player->GetLocation()->Remove(enemy);
 
+		if (enemy->GetName() == "boss")
+		{
+			std::cout << std::endl;
+			std::cout << "---------------------------------" << std::endl;
+			std::cout << "Congratulations." << std::endl;
+			std::cout << "You have defeated the boss and escaped the cave." << std::endl;
+			std::cout << "Thanks for playing!" << std::endl;
+			std::cout << "---------------------------------" << std::endl;
+
+			canPlay = false;
+			return;
+		}
 		player->GetLocation()->Look();
 
 		return;
@@ -789,6 +813,58 @@ void World::Search()
 	}
 }
 
+void World::Read(const std::vector<std::string>& tokens)
+{
+	if (tokens.size() < 2)
+	{
+		std::cout << "Read what?" << std::endl;
+		return;
+	}
+
+	Entity* backpack = player->Find("backpack");
+
+	Entity* entity = backpack->Find(tokens[1]);
+
+	if (entity == nullptr)
+	{
+		entity = player->GetLocation()->Find(tokens[1]);
+	}
+
+	if (entity == nullptr)
+	{
+		std::cout << "You don't have a " << tokens[1] << "." << std::endl;
+		return;
+	}
+
+	if (entity->GetType() != EntityType::Item)
+	{
+		std::cout << "You can't read that." << std::endl;
+		return;
+	}
+
+	Item* item = static_cast<Item*>(entity);
+
+	if (item->GetName() != "map")
+	{
+		std::cout << "You can't read that." << std::endl;
+		return;
+	}
+
+	std::cout << "Cave map:" << std::endl;
+	std::cout << "[Room 6] Boss" << std::endl;
+	std::cout << "     |" << std::endl;
+	std::cout << "[Room 3] Monster - Chest (Sword)" << std::endl;
+	std::cout << "     |" << std::endl;
+	std::cout << "[Room 2] Potion" << std::endl;
+	std::cout << "   /       \\" << std::endl;
+	std::cout << "[Room 4]   [Room 5]" << std::endl;
+	std::cout << "Armor      Map" << std::endl;
+	std::cout << "Bag(Key)" << std::endl;
+	std::cout << "[Room 1]" << std::endl;
+	std::cout << "A note is written at the bottom:" << std::endl;
+	std::cout << "\"You must be prepared for everything.\"" << std::endl;
+}
+
 NPC* World::GetEnemy(Room* room) const
 {
 	for (Entity* entity : room->GetContains())
@@ -803,6 +879,24 @@ NPC* World::GetEnemy(Room* room) const
 		}
 	}
 	return nullptr;
+}
+
+void World::Help()
+{
+	std::cout << "Available commands:" << std::endl;
+	std::cout << "look - Look around the room." << std::endl;
+	std::cout << "go direction - Move north, south, east or west." << std::endl;
+	std::cout << "take item - Pick up an item." << std::endl;
+	std::cout << "drop item - Drop an item." << std::endl;
+	std::cout << "open item - Open a container." << std::endl;
+	std::cout << "put item in item - Put an item into a container." << std::endl;
+	std::cout << "equip item - Equip a weapon or armor." << std::endl;
+	std::cout << "use item - Use an item." << std::endl;
+	std::cout << "read item - Read an item." << std::endl;
+	std::cout << "search - Search the room." << std::endl;
+	std::cout << "attack - Attack an enemy." << std::endl;
+	std::cout << "help - Show this list." << std::endl;
+	std::cout << "quit - Exit the game." << std::endl;
 }
 
 

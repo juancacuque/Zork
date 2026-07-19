@@ -78,6 +78,7 @@ Entity* Entity::Find(const std::string& name) const
 void Entity::Add(Entity* entity)
 {
     contains.push_back(entity);
+    entity->parent = this;
 }
 
 bool Entity::Remove(Entity* entity)
@@ -87,6 +88,7 @@ bool Entity::Remove(Entity* entity)
 
     if (contains.size() < before)
     {
+        entity->parent = nullptr;
         return true;
     }
 
@@ -95,4 +97,9 @@ bool Entity::Remove(Entity* entity)
         return false;
     }
     
+}
+
+Entity* Entity::GetParent() const
+{
+    return parent;
 }
