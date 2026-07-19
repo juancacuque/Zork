@@ -1,4 +1,5 @@
 #include "Entity.h"
+#include "Item.h"   
 #include <iostream>
 Entity::Entity(EntityType type, const std::string& name, const std::string& description) : type(type), name(name), description(description)
 {
@@ -47,7 +48,30 @@ Entity* Entity::Find(const std::string& name) const
         {
             return entity;
         }
+
+        if (entity->GetType() == EntityType::Item)
+        {
+            Item* item = static_cast<Item*>(entity);
+
+            if (item->GetHiddenStatus())
+            {
+                continue;
+            }
+            if (item->GetItemType() == ItemType::Openable && !item->IsOpen())
+            {
+                continue;
+            }
+        }
+        
+
+        Entity* found = entity->Find(name);
+
+        if (found != nullptr)
+        {
+            return found;
+        }
     }
+
     return nullptr;
 }
 

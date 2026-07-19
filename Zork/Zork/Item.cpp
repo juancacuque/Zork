@@ -17,3 +17,18 @@ ItemType Item::GetItemType() const
 {
     return itemType;
 }
+
+void Item::Reveal()
+{
+    isHidden = false;
+}
+
+bool Item::IsOpen() const
+{
+    return opened;
+}
+
+void Item::Open()
+{
+	opened = true;
+}

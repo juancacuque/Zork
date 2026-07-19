@@ -15,9 +15,11 @@ public:
 
 	int GetAttackDamage() const;
 	int GetReciveDamage(int damage) const;
+
+	
 private: 
 	Item* weapon = nullptr;
 	Item* armor = nullptr;
-
+	
 	
 };

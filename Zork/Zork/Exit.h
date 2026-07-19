@@ -23,7 +23,8 @@ public:
 	Room* GetDestination() const;
 	ExitDirection GetDirection() const;
 	bool GetLockStatus() const;
-
+	
+	Item* GetKey() const;
 private:
 	ExitDirection direction;
 	Room* source;

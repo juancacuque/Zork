@@ -22,6 +22,11 @@ bool Exit::GetLockStatus() const
 	return lock;
 }
 
+Item* Exit::GetKey() const
+{
+	return key;
+}
+
 
 Room* Exit::GetDestination() const
 {

@@ -5,7 +5,9 @@ enum class ItemType
 	None,
 	Weapon,
 	Armor,
-	Consumable
+	Consumable,
+	Key,
+	Openable
 };
 class Item : public Entity 
 {
@@ -15,7 +17,13 @@ public:
 
 	bool GetHiddenStatus() const;
 	ItemType GetItemType() const;
+
+	void Reveal();
+
+	bool IsOpen() const;
+	void Open();
 private:
 	bool isHidden;
 	ItemType itemType = ItemType::None;
+	bool opened = false;
 };

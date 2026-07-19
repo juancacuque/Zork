@@ -13,10 +13,13 @@ public:
 
 	void TakeDamage(int amount);
 	bool IsAlive() const;
+
+	int GetMaxHp() const;
+	void Heal(int amount);
 private:
 	int health;
 	int damage;
 	Room* location;
-
+	int maxHealth;
 	
 };

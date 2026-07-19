@@ -43,12 +43,14 @@ void World::CreateWorld()
 	player = new Player ("Player", "This is you.", 100, 10, room1);
 
 	Item* backpack = new Item("backpack", "Your backpack. You can save items or throw them from here.");
-	Item* potion = new Item("potion", "A healing potion.");
+	Item* potion = new Item("potion", "A healing potion.", false, ItemType::Consumable);
 	Item* sword = new Item("sword", "A large but old sword. Looks like it has gone through rough battles before.", false, ItemType::Weapon);
 	Item* armor = new Item("armor", "A bit small armor for you, but will work to protect you frome reciving some damage.", false, ItemType::Armor);
-	Item* bag = new Item("bag", "A small bag. You grab it and seems to not be empty.", true);
-	Item* key = new Item("key", "A small key, it might be usefull for your journey.");
+	Item* bag = new Item("bag", "A small bag. You grab it and seems to not be empty.", true, ItemType::Openable);
+	Item* key = new Item("key", "A small key, it might be usefull for your journey.", false, ItemType::Key);
+	
 	Item* map = new Item("map", "A map of the cave.");
+	Item* chest = new Item("chest", "An old wooden chest. It seems to contain something.", false, ItemType::Openable);
 
 	NPC* monster = new NPC("monster", "Ugly monster has shown up and looks agresive.", 40, 15, room3);
 	NPC* boss = new NPC("boss", "Seems to have been here covered by the previous monster, probably thay have some relation. After you enter, the boss seems to be really agresive towards you as he has seen the monster defeated.", 90, 25, room6);
@@ -95,11 +97,14 @@ void World::CreateWorld()
 	AddEntity(monster);
 	AddEntity(boss);
 
+	exit9->SetKey(key);
+
 	player->Add(backpack);
 
 	room2->Add(potion);
 
-	room3->Add(sword);
+	chest->Add(sword);
+	room3->Add(chest);
 	room3->Add(monster);
 
 	room4->Add(armor);
@@ -110,6 +115,7 @@ void World::CreateWorld()
 	room5->Add(map);
 
 	room6->Add(boss);
+	
 	
 }
 
@@ -180,6 +186,10 @@ void World::Play()
 			{
 				canPlay = false;
 			}
+			else if (tokens[0] == "use")
+			{
+				Use(tokens);
+			}
 			else
 			{
 				std::cout << "Unknown command. Type help for a list of commands.";
@@ -222,6 +232,14 @@ void World::Play()
 		else if (tokens[0] == "equip")
 		{
 			Equip(tokens);
+		}
+		else if (tokens[0] == "use")
+		{
+			Use(tokens);
+		}
+		else if (tokens[0] == "search")
+		{
+			Search();
 		}
 		else
 		{
@@ -336,10 +354,12 @@ void World::Take(const std::vector<std::string>& tokens)
 	if (entity->GetType() == EntityType::Item)
 	{
 		Item* item = static_cast<Item*>(entity);
-
+		
 		if (!item->GetHiddenStatus())
 		{
-			if (MoveEntity(item, room, backpack)) {
+			
+			if (MoveEntity(item, room, backpack)) 
+			{
 				std::cout << "You took the " << item->GetName() << " and put it in your backpack.";
 			}
 		}
@@ -440,6 +460,20 @@ void World::Open(const std::vector<std::string>& tokens)
 		if (item->GetHiddenStatus())
 		{
 			std::cout << "There is no " << tokens[1] << " here.";
+			return;
+		}
+
+		if (item->GetItemType() == ItemType::Openable && !item->IsOpen())
+		{
+			item->Open();
+
+			std::cout << "You open the chest. Inside you find:" << std::endl;
+
+			for (Entity* entity : item->GetContains())
+			{
+				std::cout << entity->GetName() << std::endl;
+			}
+
 			return;
 		}
 
@@ -608,6 +642,150 @@ void World::Attack()
 		std::cout << "Game Over." << std::endl;
 		canPlay = false;
 
+	}
+}
+
+void World::Use(const std::vector<std::string>& tokens)
+{
+	if (tokens.size() < 2)
+	{
+		std::cout << "Use what?" << std::endl;
+		return;
+	}
+
+	Entity* backpack = player->Find("backpack");
+
+	if (backpack == nullptr)
+	{
+		return;
+	}
+
+
+	Entity* entity = backpack->Find(tokens[1]);
+
+
+	if (entity == nullptr)
+	{
+		std::cout << "You don't have a " << tokens[1] << "." << std::endl;
+		return;
+	}
+
+
+	if (entity->GetType() != EntityType::Item)
+	{
+		std::cout << "You can't use that." << std::endl;
+		return;
+	}
+
+
+	Item* item = static_cast<Item*>(entity);
+
+
+	switch (item->GetItemType())
+	{ 
+	case ItemType::Consumable:
+	{
+
+		if (player->GetHealth() == player->GetMaxHp())
+		{
+			std::cout << "You are already at full health." << std::endl;
+			return;
+		}
+
+		player->Heal(100);
+
+		std::cout << "You use the " << item->GetName() << " and recover health." << std::endl;
+		backpack->Remove(item);
+
+		//recive damage if you use an item while an enemy is in the room
+		NPC* enemy = GetEnemy(player->GetLocation());
+
+		if (enemy != nullptr)
+		{
+			int damage = player->GetReciveDamage(enemy->GetDamage());
+
+			player->TakeDamage(damage);
+
+			std::cout << "The " << enemy->GetName() << " deals you " << damage << " damage." << std::endl;
+
+			std::cout << "Your health: " << player->GetHealth() << "hp." << std::endl;
+
+			if (!player->IsAlive())
+			{
+				std::cout << "You have been defeated by the " << enemy->GetName() << "!" << std::endl;
+				canPlay = false;
+			}
+		}
+
+		break;
+	}
+		 
+	case ItemType::Key:
+	{
+		Exit* lockedExit = nullptr;
+
+		for (Entity* entity : player->GetLocation()->GetContains())
+		{
+			if (entity->GetType() == EntityType::Exit)
+			{
+				Exit* exit = static_cast<Exit*>(entity);
+
+				if (exit->GetLockStatus())
+				{
+					lockedExit = exit;
+					break;
+				}
+			}
+		}
+
+		if (lockedExit == nullptr)
+		{
+			std::cout << "There is no locked door here." << std::endl;
+			return;
+		}
+
+		if (lockedExit->GetKey() != item)
+		{
+			std::cout << "This key doesn't fit." << std::endl;
+			return;
+		}
+
+		lockedExit->Unlock();
+
+		std::cout << "The key turns and unlocks the door." << std::endl;
+		backpack->Remove(item);
+		break;
+	}
+
+	default:
+		std::cout << "You can't use the " << item->GetName() << "." << std::endl;
+		break;
+	
+	}
+}
+
+void World::Search()
+{
+	bool found = false;
+
+	for (Entity* entity : player->GetLocation()->GetContains())
+	{
+		if (entity->GetType() == EntityType::Item)
+		{
+			Item* item = static_cast<Item*>(entity);
+
+			if (item->GetHiddenStatus())
+			{
+				item->Reveal();
+
+				std::cout << "Searching the room you find a " << item->GetName() << "!" << std::endl;
+				found = true;
+			}
+		}
+	}
+	if (!found)
+	{
+		std::cout << "You find nothing else." << std::endl;
 	}
 }
 

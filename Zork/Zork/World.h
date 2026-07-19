@@ -31,6 +31,8 @@ private:
 	void Put(const std::vector<std::string>& tokens);
 	void Equip(const std::vector<std::string>& tokens);
 	void Attack();
+	void Use(const std::vector<std::string>& tokens);
+	void Search();
 
 	NPC* GetEnemy(Room* room) const;
 
