@@ -29,6 +29,7 @@ private:
 	void Drop(const std::vector<std::string>& tokens);
 	void Open(const std::vector<std::string>& tokens);
 	void Put(const std::vector<std::string>& tokens);
+	void Equip(const std::vector<std::string>& tokens);
 	void Attack();
 
 	NPC* GetEnemy(Room* room) const;

@@ -44,8 +44,8 @@ void World::CreateWorld()
 
 	Item* backpack = new Item("backpack", "Your backpack. You can save items or throw them from here.");
 	Item* potion = new Item("potion", "A healing potion.");
-	Item* sword = new Item("sword", "A large but old sword. Looks like it has gone through rough battles before.");
-	Item* armor = new Item("armor", "A bit small armor for you, but will work to protect you frome reciving some damage.");
+	Item* sword = new Item("sword", "A large but old sword. Looks like it has gone through rough battles before.", false, ItemType::Weapon);
+	Item* armor = new Item("armor", "A bit small armor for you, but will work to protect you frome reciving some damage.", false, ItemType::Armor);
 	Item* bag = new Item("bag", "A small bag. You grab it and seems to not be empty.", true);
 	Item* key = new Item("key", "A small key, it might be usefull for your journey.");
 	Item* map = new Item("map", "A map of the cave.");
@@ -219,6 +219,10 @@ void World::Play()
 		{
 			Attack();
 		}
+		else if (tokens[0] == "equip")
+		{
+			Equip(tokens);
+		}
 		else
 		{
 			std::cout << "Unknown command. Type help for a list of commands.";
@@ -257,9 +261,11 @@ void World::Go(const std::vector<std::string>& tokens)
 
 		if (enemy != nullptr)
 		{
-			player->TakeDamage(enemy->GetDamage());
+			int damage = player->GetReciveDamage(enemy->GetDamage());
 
-			std::cout << "The " << enemy->GetName() << " hits you while you try to escape for " << enemy->GetDamage() << " damage." << std::endl;
+			player->TakeDamage(damage);
+
+			std::cout << "The " << enemy->GetName() << " hits you while you try to escape for " << damage << " damage." << std::endl;
 
 			std::cout << "Your health: "<< player->GetHealth() << "hp." << std::endl;
 
@@ -367,9 +373,24 @@ void World::Drop(const std::vector<std::string>& tokens)
 		return;
 	}
 	
+	Item* item = static_cast<Item*>(entity);
 
-	if (MoveEntity(entity, backpack, room)) {
-		std::cout << "You dropped the " << entity->GetName() << " in the " << room->GetName() << ".";
+	if (item == player->GetWeapon())
+	{
+		player->UnequipWeapon();
+		std::cout << "You unequip the " << item->GetName() << " before dropping it." << std::endl;
+	}
+
+	if (item == player->GetArmor())
+	{
+		player->UnequipArmor();
+		std::cout << "You unequip the " << item->GetName() << " before dropping it." << std::endl;
+	}
+
+	if (MoveEntity(entity, backpack, room))
+	{
+		std::cout << "You dropped the " << entity->GetName()
+			<< " in the " << room->GetName() << ".";
 	}
 }
 
@@ -511,6 +532,42 @@ void World::Put(const std::vector<std::string>& tokens)
 	
 }
 
+void World::Equip(const std::vector<std::string>& tokens)
+{
+	if (tokens.size() < 2)
+	{
+		std::cout << "Equip what?" << std::endl;
+		return;
+	}
+
+	Entity* backpack = player->Find("backpack");
+
+	if (backpack == nullptr)
+	{
+		return;
+	}
+
+	Entity* entity = backpack->Find(tokens[1]);
+
+	if (entity == nullptr)
+	{
+		std::cout << "You don't have a " << tokens[1] << "." << std::endl;
+		return;
+	}
+
+	if (entity->GetType() != EntityType::Item)
+	{
+		std::cout << "You can't equip that." << std::endl;
+		return;
+	}
+
+	Item* item = static_cast<Item*>(entity);
+
+	player->Equip(item);
+}
+
+
+
 void World::Attack()
 {
 	NPC* enemy = GetEnemy(player->GetLocation());
@@ -521,9 +578,9 @@ void World::Attack()
 		return;
 	}
 
-	enemy->TakeDamage(player->GetDamage());
+	enemy->TakeDamage(player->GetAttackDamage());
 
-	std::cout << "You hit the " << enemy->GetName() << " and deal " << player->GetDamage() << " damage." << std::endl;
+	std::cout << "You hit the " << enemy->GetName() << " and deal " << player->GetAttackDamage() << " damage." << std::endl;
 	std::cout << "The " << enemy->GetName() << "'s health: " << enemy->GetHealth() << "hp." << std::endl;
 
 	if (!enemy->IsAlive())
@@ -538,9 +595,11 @@ void World::Attack()
 		return;
 	}
 
-	player->TakeDamage(enemy->GetDamage());
+	int damage = player->GetReciveDamage(enemy->GetDamage());
 
-	std::cout << "The " << enemy->GetName()	<< " hits you for " << enemy->GetDamage() << " damage."
+	player->TakeDamage(damage);
+
+	std::cout << "The " << enemy->GetName()	<< " hits you for " << damage << " damage."
 		<< std::endl;
 	std::cout << "Your health: " << player->GetHealth() <<"hp." << std::endl;
 	if (!player->IsAlive())
